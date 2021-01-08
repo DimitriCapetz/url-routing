@@ -49,6 +49,7 @@ if version['latest'] > latestVersion:
             ip4s = [ip for ip in ips if '.' in ip]
             tcpPorts = endpointSet['tcpPorts'] if 'tcpPorts' in endpointSet else ''
             udpPorts = endpointSet['udpPorts'] if 'udpPorts' in endpointSet else ''
+            
             flatIps.extend([(category, ip, tcpPorts, udpPorts) for ip in ip4s])
     print('IPv4 IP Address Ranges')
     print(','.join(sorted(set([ip for (category, ip, tcpPorts, udpPorts) in flatIps]))))
