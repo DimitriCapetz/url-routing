@@ -109,6 +109,7 @@ def addAclEntries(ip, aclName, aclContent):
     for newAce in aclContent:
         switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, newAce])
         print('New ACE created: ' + newAce)
+    switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, 'resequence'])
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-{} commit'.format(configSessionId)])
     switchInstance.runCmds(1, ['enable', 'copy running-config startup-config'])
 
@@ -118,9 +119,9 @@ def removeAclEntries(ip, aclName, aclContent):
     configSessionId = time.strftime('%Y%m%d%H%M%S', t)
     switchInstance = eapiSetup(ip)
     for oldAce in aclContent:
-
         switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, oldAce])
         print('Old ACE removed: ' + oldAce)
+    switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, 'resequence'])
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-{} commit'.format(configSessionId)])
     switchInstance.runCmds(1, ['enable', 'copy running-config startup-config'])
 
@@ -140,7 +141,7 @@ def main():
             print('ACE exists for {} {} ports {}...skipping entry'.format(ace['prefix'], ace['protocol'], ace['ports']))
         else:
             if ace['protocol'] == 'ip':
-                newAclConfig.extend('permit ip any {}').format(ace['prefix'])
+                newAclConfig.extend([('permit ip any {}').format(ace['prefix'])])
             else:
                 combinedPorts = ace['ports'].replace(',', ' ')
                 newAclConfig.extend([('permit {} any {} eq {}').format(ace['protocol'], ace['prefix'], combinedPorts)])
@@ -155,14 +156,14 @@ def main():
             continue
         else:
             if ace['protocol'] == 'ip':
-                newAclConfig.extend('no permit ip any {}').format(ace['prefix'])
+                oldAclEntries.extend([('no permit ip any {}').format(ace['prefix'])])
             else:
                 combinedPorts = ace['ports'].replace(',', ' ')
                 oldAclEntries.extend([('no permit {} any {} eq {}').format(ace['protocol'], ace['prefix'], combinedPorts)])
     if oldAclEntries != []:
         removeAclEntries('10.100.100.1', 'REDIRECT', oldAclEntries)
     else:
-        print('No ACL Entries require removal')
+        print('No ACL entries require removal')
     if newAclConfig != [] and oldAclEntries != []:
         writeConfig('10.100.100.1')
         print('ACL Configuration updated and saved.')
