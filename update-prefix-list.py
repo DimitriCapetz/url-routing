@@ -80,8 +80,8 @@ def eapiSetup(ip):
 
 def parseCurrentAcl(ip, aclName):
     # Pull currentl ACL config for PBR and parse to key info for comparison
-    switchInstance = eapiSetup('10.100.100.1')
-    currentAcl = switchInstance.runCmds(1, ['enable', 'show ip access-lists REDIRECT'])[1]['aclList'][0]['sequence']
+    switchInstance = eapiSetup(ip)
+    currentAcl = switchInstance.runCmds(1, ['enable', 'show ip access-lists ' + aclName])[1]['aclList'][0]['sequence']
     currentAces = []
     for aclEntry in currentAcl:
         subnet = aclEntry['ruleFilter']['destination']['ip']
