@@ -111,7 +111,6 @@ def addAclEntries(ip, aclName, aclContent):
         print('New ACE created: ' + newAce)
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, 'resequence'])
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-{} commit'.format(configSessionId)])
-    switchInstance.runCmds(1, ['enable', 'copy running-config startup-config'])
 
 def removeAclEntries(ip, aclName, aclContent):
     # Send ACL Commands to switch via eAPI
@@ -123,7 +122,6 @@ def removeAclEntries(ip, aclName, aclContent):
         print('Old ACE removed: ' + oldAce)
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-' + configSessionId, 'ip access-list ' + aclName, 'resequence'])
     switchInstance.runCmds(1, ['enable', 'configure session ACL-UPDATE-{} commit'.format(configSessionId)])
-    switchInstance.runCmds(1, ['enable', 'copy running-config startup-config'])
 
 def writeConfig(ip):
     # Save Config
@@ -163,10 +161,15 @@ def main():
     if oldAclEntries != []:
         removeAclEntries('10.100.100.1', 'REDIRECT', oldAclEntries)
     else:
-        print('No ACL entries require removal')
-    if newAclConfig != [] and oldAclEntries != []:
+        print('No ACL entries require removal.')
+    if newAclConfig != []:
         writeConfig('10.100.100.1')
-        print('ACL Configuration updated and saved.')
+        print('ACL configuration updated and saved.')
+    elif oldAclEntries != []:
+        writeConfig('10.100.100.1')
+        print('ACL configuration updated and saved.')
+    else:
+        print('No configuration updates made.')
 
 if __name__ == '__main__':
     main()
